@@ -1,12 +1,13 @@
 package com.smart4j.helper;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -22,8 +23,11 @@ public final class DatabaseHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class);
 
-	private static final ThreadLocal<Connection> CONNECTION_HOLDER = new ThreadLocal<Connection>();
-	private static final QueryRunner QUERY_RUNNER = new QueryRunner();
+	private static final ThreadLocal<Connection> CONNECTION_HOLDER;
+	private static final QueryRunner QUERY_RUNNER;
+
+	// 添加数据库连接池
+	private static final BasicDataSource DATA_SOURCE;
 
 	private static final String DRIVER;
 	private static final String URL;
@@ -31,6 +35,9 @@ public final class DatabaseHelper {
 	private static final String PASSWORD;
 
 	static {
+		CONNECTION_HOLDER = new ThreadLocal<Connection>();
+		QUERY_RUNNER = new QueryRunner();
+
 		Properties conf = PropsUtil.LoadProps("config.properties");
 		DRIVER = conf.getProperty(ConfigConstant.JDBC_DRIVER);
 		URL = conf.getProperty(ConfigConstant.JDBC_URL);
@@ -42,6 +49,12 @@ public final class DatabaseHelper {
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("can not load jdbc driver", e);
 		}
+
+		DATA_SOURCE = new BasicDataSource();
+		DATA_SOURCE.setDriverClassName(DRIVER);
+		DATA_SOURCE.setUrl(URL);
+		DATA_SOURCE.setUsername(USERNAME);
+		DATA_SOURCE.setPassword(PASSWORD);
 	}
 
 	/**
@@ -51,9 +64,10 @@ public final class DatabaseHelper {
 		Connection connection = CONNECTION_HOLDER.get();
 		if (connection == null) {
 			try {
-				connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+				//				connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+				connection = DATA_SOURCE.getConnection();
 			} catch (SQLException e) {
-				LOGGER.error("get connection failure");
+				LOGGER.error("get connection failure", e);
 			} finally {
 				CONNECTION_HOLDER.set(connection);
 			}
@@ -65,19 +79,19 @@ public final class DatabaseHelper {
 	 * 关闭数据库连接
 	 * 
 	 */
-	public static void closeConnection() {
-		Connection conn = CONNECTION_HOLDER.get();
-		if (conn != null) {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				LOGGER.error("close connection failure", e);
-				throw new RuntimeException(e);
-			} finally {
-				CONNECTION_HOLDER.remove();
-			}
-		}
-	}
+	//	public static void closeConnection() {
+	//		Connection conn = CONNECTION_HOLDER.get();
+	//		if (conn != null) {
+	//			try {
+	//				conn.close();
+	//			} catch (SQLException e) {
+	//				LOGGER.error("close connection failure", e);
+	//				throw new RuntimeException(e);
+	//			} finally {
+	//				CONNECTION_HOLDER.remove();
+	//			}
+	//		}
+	//	}
 
 	/**
 	 * 查询实体列表（List）
@@ -109,9 +123,10 @@ public final class DatabaseHelper {
 		} catch (SQLException e) {
 			LOGGER.error("query entity list failure", e);
 			throw new RuntimeException(e);
-		} finally {
-			closeConnection();
 		}
+		//		finally {
+		//			closeConnection();
+		//		}
 		return entityList;
 	}
 
@@ -130,9 +145,10 @@ public final class DatabaseHelper {
 		} catch (SQLException e) {
 			LOGGER.error("query entity failure", e);
 			throw new RuntimeException(e);
-		} finally {
-			closeConnection();
 		}
+		//		finally {
+		//			closeConnection();
+		//		}
 		return entity;
 	}
 
@@ -152,9 +168,10 @@ public final class DatabaseHelper {
 		} catch (SQLException e) {
 			LOGGER.error("execute query sql failure", e);
 			throw new RuntimeException(e);
-		} finally {
-			closeConnection();
 		}
+		//		finally {
+		//			closeConnection();
+		//		}
 		return result;
 	}
 
@@ -167,6 +184,7 @@ public final class DatabaseHelper {
 	 * @return
 	 */
 	public static int executeUpdate(String sql, Object... params) {
+		System.out.println("@@@@@@@@@@@@@@ executeUpdate ... sql=" + sql);
 		int rows = 0;
 		try {
 			Connection conn = getConnection();
@@ -174,12 +192,20 @@ public final class DatabaseHelper {
 		} catch (SQLException e) {
 			LOGGER.error("execute update failure", e);
 			throw new RuntimeException(e);
-		} finally {
-			closeConnection();
 		}
+		//		finally {
+		//			closeConnection();
+		//		}
 		return rows;
 	}
 
+	/**
+	 * 插入一条记录
+	 * 
+	 * @param entityClass
+	 * @param fieldMap
+	 * @return
+	 */
 	public static <T> boolean insertEntity(Class<T> entityClass, Map<String, Object> fieldMap) {
 		if (CollectionUtil.isEmpty(fieldMap)) {
 			LOGGER.error("Cannot insert entity: Map<String, Object> fileMap is empty");
@@ -199,7 +225,55 @@ public final class DatabaseHelper {
 		columns.replace(columns.lastIndexOf(","), columns.length(), ")");
 		values.replace(values.lastIndexOf(","), values.length(), ")");
 
-		return true;
+		sql = sql + columns + " Values " + values;
+
+		Object[] params = fieldMap.values().toArray();
+
+		// 检查执行后受影响的行是否为1， ==1说明执行成功。
+		return executeUpdate(sql, params) == 1;
+	}
+
+	/**
+	 * 更新实体， 更新一条记录
+	 * 
+	 * @param entityClass
+	 * @param id
+	 * @param fieldMap
+	 * @return
+	 */
+	public static <T> boolean updateEntity(Class<T> entityClass, long id, Map<String, Object> fieldMap) {
+		if (CollectionUtil.isEmpty(fieldMap)) {
+			LOGGER.error("update entity failure: fieldMap is empty!");
+			return false;
+		}
+
+		String sql = "update table " + getTableName(entityClass) + " set ";
+		StringBuilder columns = new StringBuilder();
+		for (String fieldName : fieldMap.keySet()) {
+			columns.append(fieldName).append("=?, ");
+		}
+
+		sql = sql + columns.substring(0, columns.lastIndexOf(",")) + " where id=?";
+
+		List<Object> paramList = new ArrayList<Object>();
+		paramList.addAll(fieldMap.values());
+		paramList.add(id);
+
+		Object[] params = paramList.toArray();
+
+		return executeUpdate(sql, params) == 1;
+	}
+
+	/**
+	 * 删除实体， 删除一条记录
+	 * 
+	 * @param entityClass
+	 * @param id
+	 * @return
+	 */
+	public static <T> boolean deleteEntity(Class<T> entityClass, long id) {
+		String sql = "delete from " + getTableName(entityClass) + " where id=?";
+		return executeUpdate(sql, id) == 1;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package com.smart4j.utils;
+package com.smart4j.framework.utils;
 
 import org.apache.commons.lang3.StringUtils;
 

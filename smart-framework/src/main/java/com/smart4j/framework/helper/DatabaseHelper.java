@@ -1,4 +1,4 @@
-package com.smart4j.helper;
+package com.smart4j.framework.helper;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.smart4j.framework.ConfigConstant;
-import com.smart4j.utils.CollectionUtil;
-import com.smart4j.utils.PropsUtil;
+import com.smart4j.framework.utils.CollectionUtil;
+import com.smart4j.framework.utils.PropsUtil;
 
 public final class DatabaseHelper {
 

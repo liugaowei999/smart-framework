@@ -4,15 +4,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.smart4j.framework.ConfigConstant;
+import com.smart4j.utils.CollectionUtil;
 import com.smart4j.utils.PropsUtil;
 
 public final class DatabaseHelper {
@@ -112,6 +115,13 @@ public final class DatabaseHelper {
 		return entityList;
 	}
 
+	/**
+	 * 查询实体
+	 * @param entityClass
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
 	public static <T> T queryEntiry(Class<T> entityClass, String sql, Object... params) {
 		T entity;
 		try {
@@ -124,6 +134,81 @@ public final class DatabaseHelper {
 			closeConnection();
 		}
 		return entity;
+	}
+
+	/**
+	 * 执行查询语句sql
+	 * 返回 列表 - 列值 结果集列表
+	 * 
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
+	public static List<Map<String, Object>> executeQuery(String sql, Object... params) {
+		List<Map<String, Object>> result;
+		try {
+			Connection conn = getConnection();
+			result = QUERY_RUNNER.query(conn, sql, new MapListHandler(), params);
+		} catch (SQLException e) {
+			LOGGER.error("execute query sql failure", e);
+			throw new RuntimeException(e);
+		} finally {
+			closeConnection();
+		}
+		return result;
+	}
+
+	/**
+	 * 执行更新语句（包括：update，insert， delete）
+	 * 返回执行后受影响的行数
+	 * 
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
+	public static int executeUpdate(String sql, Object... params) {
+		int rows = 0;
+		try {
+			Connection conn = getConnection();
+			rows = QUERY_RUNNER.update(conn, sql, params);
+		} catch (SQLException e) {
+			LOGGER.error("execute update failure", e);
+			throw new RuntimeException(e);
+		} finally {
+			closeConnection();
+		}
+		return rows;
+	}
+
+	public static <T> boolean insertEntity(Class<T> entityClass, Map<String, Object> fieldMap) {
+		if (CollectionUtil.isEmpty(fieldMap)) {
+			LOGGER.error("Cannot insert entity: Map<String, Object> fileMap is empty");
+			return false;
+		}
+
+		String sql = "insert into " + getTableName(entityClass);
+		StringBuilder columns = new StringBuilder("(");
+		StringBuilder values = new StringBuilder("(");
+
+		for (String fieldName : fieldMap.keySet()) {
+			columns.append(fieldName).append(",");
+			values.append("?,");
+		}
+
+		// 将最后一个"," 替换为 ")"
+		columns.replace(columns.lastIndexOf(","), columns.length(), ")");
+		values.replace(values.lastIndexOf(","), values.length(), ")");
+
+		return true;
+	}
+
+	/**
+	 * 返回Class对象的简单名称， 即类的名称
+	 * @param entityClass
+	 * @return
+	 */
+	private static String getTableName(Class<?> entityClass) {
+		return entityClass.getSimpleName();
 	}
 
 }

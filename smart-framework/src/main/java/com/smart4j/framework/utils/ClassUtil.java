@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 框架类加载器
+ * 框架类加载器， 通知JVM加载对应的包名下的类对象到ClassLoader容器中。 只加载类，不做类的实例化对象
+ * 
  * 类操作工具类
  * 
  * @author liugaowei
@@ -28,8 +29,18 @@ public final class ClassUtil {
 	 * 获取类加载器
 	 */
 	public static ClassLoader getClassLoader() {
-		// 返回当前线程的类加载器
-		return Thread.currentThread().getContextClassLoader();
+		ClassLoader cl = null;
+		try {
+			// 返回当前线程的类加载器
+			cl = Thread.currentThread().getContextClassLoader();
+		} catch (Throwable ex) {
+			// Cannot access thread context ClassLoader - falling back to system class loader...
+		}
+		if (cl == null) {
+			// No thread context class loader -> use class loader of this class.
+			cl = ClassUtil.class.getClassLoader();
+		}
+		return cl;
 	}
 
 	/**
@@ -38,6 +49,11 @@ public final class ClassUtil {
 	public static Class<?> loadClass(String className, boolean isInitilized) {
 		Class<?> cls;
 		try {
+			/**
+			 * 1. Class.forName : 通知JVM动态加载一个类，返回这个类的Class对象。【注意返回的不是实例化的Object对象】 
+			 * 				      第二个参数可以控制是否执行类的静态代码块
+			 * 2. Class对象调用.newInstance() 返回的是实例化的Object对象， 调用的无参数的构造函数。
+			 */
 			cls = Class.forName(className, isInitilized, getClassLoader());
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("load class failure", e);
@@ -140,7 +156,7 @@ public final class ClassUtil {
 	}
 
 	private static void doAddClass(Set<Class<?>> classSet, String className) {
-		// 默认类加载时，不执行类的初始化
+		// 默认类加载时，不执行类的静态代码块初始化
 		Class<?> class1 = loadClass(className, false);
 		classSet.add(class1);
 	}

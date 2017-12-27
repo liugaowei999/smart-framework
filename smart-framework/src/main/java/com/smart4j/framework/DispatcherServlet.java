@@ -139,8 +139,8 @@ public class DispatcherServlet extends HttpServlet {
 
 	@Override
 	public void init(ServletConfig servletConfig) throws ServletException {
-		super.init(servletConfig);
-
+		//		super.init(servletConfig);
+		System.out.println("DispatcherServlet init .......");
 		// 初始化相关的Helper类
 		HelperLoader.init();
 

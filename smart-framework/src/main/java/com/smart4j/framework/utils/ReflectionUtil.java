@@ -40,14 +40,21 @@ public final class ReflectionUtil {
 	 */
 	public static Object invokeMethod(Object obj, Method method, Object... args) {
 		Object result;
+		LOGGER.debug("methodName=" + method.getName() + ", args.length=" + args.length);
 
 		try {
 			// 设置private方法的可见性，否则无法调用
 			method.setAccessible(true);
 
-			result = method.invoke(obj, args);
+			if (method.getParameterCount() == 0) {
+				result = method.invoke(obj, null);
+			} else {
+				result = method.invoke(obj, args);
+			}
+			LOGGER.debug("result=" + result);
+
 		} catch (Exception e) {
-			LOGGER.error("method invoke failure", e);
+			LOGGER.error("method invoke failure! methodName=" + method.getName() + ", args.length=" + args.length, e);
 			throw new RuntimeException(e);
 		}
 

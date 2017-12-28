@@ -68,7 +68,7 @@ public final class ReflectionUtil {
 			//				//}
 			//			}
 
-			if (i <= requestParamValues.length) {
+			if (i < requestParamValues.length) {
 				args[i] = requestParamValues[i];
 			}
 			if (args[i] == null) {

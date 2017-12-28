@@ -3,6 +3,7 @@ package com.smart4j.framework.utils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -48,6 +49,9 @@ public final class ReflectionUtil {
 
 		// 请求传递过来的参数值
 		Map<String, Object> paramMap = param.getParamMap();
+		Collection<Object> values = paramMap.values();
+		Object[] requestParamValues = new Object[values.size()];
+		values.toArray(requestParamValues);
 
 		// 方法本身需要的参数定义信息
 		Parameter[] parameters = method.getParameters();
@@ -56,12 +60,16 @@ public final class ReflectionUtil {
 		for (int i = 0; i < parameters.length; i++) {
 			args[i] = null;
 			System.out.println("param name[" + i + "]=" + parameters[i].getName());
-			for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
-				// 不能使用==（==比较的是地址）
-				// 反射获取参数，名称信息会丢失，待后续优化 --- 参数名称的获取，请参考Spring的LocalVariableTableParameterNameDiscoverer 类
-				//if (parameters[i].getName().toLowerCase().equals(entry.getKey().toLowerCase())) {
-				args[i] = entry.getValue();
-				//}
+			//			for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
+			//				// 不能使用==（==比较的是地址）
+			//				// 反射获取参数，名称信息会丢失，待后续优化 --- 参数名称的获取，请参考Spring的LocalVariableTableParameterNameDiscoverer 类
+			//				//if (parameters[i].getName().toLowerCase().equals(entry.getKey().toLowerCase())) {
+			//				args[i] = entry.getValue();
+			//				//}
+			//			}
+
+			if (i <= requestParamValues.length) {
+				args[i] = requestParamValues[i];
 			}
 			if (args[i] == null) {
 				LOGGER.error("the parameter :[" + parameters[i].getName() + "] is missed! when execute the method:["

@@ -46,4 +46,16 @@ public class View {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("\n=================View print: ==============\n");
+		stringBuilder.append("path=" + this.path + "\n");
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			stringBuilder.append("key=" + entry.getKey() + ", value=" + entry.getValue() + "\n");
+		}
+		stringBuilder.append("===========================================\n");
+		return stringBuilder.toString();
+	}
+
 }

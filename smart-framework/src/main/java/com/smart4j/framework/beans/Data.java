@@ -28,4 +28,9 @@ public class Data {
 		return model;
 	}
 
+	@Override
+	public String toString() {
+		return (String) model;
+	}
+
 }

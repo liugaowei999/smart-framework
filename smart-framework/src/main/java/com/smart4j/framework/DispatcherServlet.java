@@ -56,6 +56,7 @@ public class DispatcherServlet extends HttpServlet {
 		String requestMethod = request.getMethod().toLowerCase();
 		// 获取请求路径
 		String requestPath = request.getPathInfo();
+		System.out.println("DispatcherServlet ==== requestMethod=" + requestMethod + ", requestPath=" + requestPath);
 
 		// 获取Action处理器
 		Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
@@ -76,10 +77,12 @@ public class DispatcherServlet extends HttpServlet {
 				String paramName = paramNames.nextElement();
 				String paramValue = request.getParameter(paramName);
 				paramMap.put(paramName, paramValue);
+				System.out.println("DispatcherServlet POST==== paramName=" + paramName + ", paramValue=" + paramValue);
 			}
 
 			// Get方式参数 - 从HttpRequest中获取请求URL, 并从URL获取查询参数
 			String body = CodecUtil.decodeURL(StreamUtil.getString(request.getInputStream()));
+			System.out.println("DispatcherServlet ==== body=" + body);
 
 			if (StringUtil.isNotEmpty(body)) {
 				String[] params = body.split("&");
@@ -90,6 +93,8 @@ public class DispatcherServlet extends HttpServlet {
 							String paramName = array[0];
 							String paramValue = array[1];
 							paramMap.put(paramName, paramValue);
+							System.out.println(
+									"DispatcherServlet GET==== paramName=" + paramName + ", paramValue=" + paramValue);
 						}
 					}
 				}
@@ -104,6 +109,7 @@ public class DispatcherServlet extends HttpServlet {
 			if (result instanceof View) {
 				// 返回JSP页面
 				View view = (View) result;
+				System.out.println("DispatcherServlet result ==== view=" + view);
 
 				String path = view.getPath();
 				if (StringUtil.isNotEmpty(path)) {
@@ -123,6 +129,7 @@ public class DispatcherServlet extends HttpServlet {
 			} else if (result instanceof Data) {
 				// 返回Json数据
 				Data data = (Data) result;
+				System.out.println("DispatcherServlet result ==== Data=" + data);
 				Object model = data.getModel();
 				if (model != null) {
 					response.setContentType("application/json");
@@ -134,7 +141,10 @@ public class DispatcherServlet extends HttpServlet {
 					writer.close();
 				}
 			}
+		} else {
+			System.out.println("============ handler is null ==================");
 		}
+
 	}
 
 	@Override

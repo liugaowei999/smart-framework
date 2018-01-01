@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
- * JDK方式实现动态代理
+ * JDK方式实现动态代理 拦截的所有的方法
  * 
  * @author liugaowei
  *

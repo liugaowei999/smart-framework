@@ -60,4 +60,14 @@ public final class BeanHelper {
 		return (T) BEAN_MAP.get(cls);
 	}
 
+	/**
+	 * 添加Bean实例到BeanMap --- 例如：加入切面注解的Bean
+	 * 
+	 * @param cls
+	 * @param obj
+	 */
+	public static void setBean(Class<?> cls, Object obj) {
+		BEAN_MAP.put(cls, obj);
+	}
+
 }

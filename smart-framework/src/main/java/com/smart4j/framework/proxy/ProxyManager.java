@@ -24,7 +24,7 @@ public class ProxyManager {
 			public Object intercept(Object targetObject, Method targetMethod, Object[] methodParams,
 					MethodProxy methodProxy) throws Throwable {
 
-				return new ProxyChain(getClass(), targetObject, targetMethod, methodProxy, methodParams, proxyList)
+				return new ProxyChain(targetClass, targetObject, targetMethod, methodProxy, methodParams, proxyList)
 						.doProxyChain();
 			}
 		});

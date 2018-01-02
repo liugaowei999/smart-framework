@@ -1,5 +1,6 @@
 package com.smart4j.framework;
 
+import com.smart4j.framework.helper.AopHelper;
 import com.smart4j.framework.helper.BeanHelper;
 import com.smart4j.framework.helper.ClassHelper;
 import com.smart4j.framework.helper.ControllerHelper;
@@ -16,7 +17,11 @@ import com.smart4j.framework.utils.ClassUtil;
 public final class HelperLoader {
 
 	public static void init() {
-		Class<?>[] helperClassList = { ClassHelper.class, BeanHelper.class, IocHelper.class, ControllerHelper.class };
+		/**
+		 * AopHelper 要在IocHelper之前， 保证依赖注入之前， 切面（代理）对象已经生成。
+		 */
+		Class<?>[] helperClassList = { ClassHelper.class, BeanHelper.class, AopHelper.class, IocHelper.class,
+				ControllerHelper.class };
 
 		for (Class<?> cls : helperClassList) {
 			// 加载列表中的Helper类， 并执行其静态代码块

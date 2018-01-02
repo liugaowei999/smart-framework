@@ -92,7 +92,7 @@ public final class ClassHelper {
 	}
 
 	/**
-	 * 获取应用包名下 带有某注解的所有类
+	 * 获取应用包名下 的目标类  ------------- 带有某注解的所有类
 	 */
 	public static Set<Class<?>> getClassSetByAnnotation(Class<? extends Annotation> annotationClass) {
 		Set<Class<?>> classSet = new HashSet<Class<?>>();

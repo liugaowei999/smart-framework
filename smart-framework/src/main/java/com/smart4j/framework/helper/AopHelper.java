@@ -29,6 +29,7 @@ public final class AopHelper {
 			for (Map.Entry<Class<?>, List<Proxy>> targetEntry : targetMap.entrySet()) {
 				Class<?> targetClass = targetEntry.getKey();
 				List<Proxy> proxyList = targetEntry.getValue();
+				System.out.println(targetClass.getName());
 				Object proxy = ProxyManager.createProxy(targetClass, proxyList);
 				BeanHelper.setBean(targetClass, proxy);
 			}
@@ -61,10 +62,12 @@ public final class AopHelper {
 	 * 的注解属性去获取该注解对应的目标类集合，然后才能建立 代理类与目标类集合之间的映射关系。
 	 **********************************************************************************************/
 	public static Map<Class<?>, Set<Class<?>>> createProxyMap() throws Exception {
+		System.out.println("Start to createProxyMap() .......");
 		Map<Class<?>, Set<Class<?>>> proxyMap = new HashMap<Class<?>, Set<Class<?>>>();
 
 		Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
 		for (Class<?> proxyClass : proxyClassSet) {
+			System.out.println("proxyClass.getName()=" + proxyClass.getName());
 			// 如果有 @Aspect 的注解
 			if (proxyClass.isAnnotationPresent(Aspect.class)) {
 				Aspect aspect = proxyClass.getAnnotation(Aspect.class);

@@ -19,10 +19,11 @@ public class ProxyManager {
 	public static <T> T createProxy(final Class<T> targetClass, final List<Proxy> proxyList) {
 
 		return (T) Enhancer.create(targetClass, new MethodInterceptor() {
-
 			@Override
 			public Object intercept(Object targetObject, Method targetMethod, Object[] methodParams,
 					MethodProxy methodProxy) throws Throwable {
+				System.out.println("ProxyManager->createProxy->intercept" + targetClass.getName());
+				System.out.println("ProxyManager->createProxy->intercept" + targetMethod.getName());
 
 				return new ProxyChain(targetClass, targetObject, targetMethod, methodProxy, methodParams, proxyList)
 						.doProxyChain();

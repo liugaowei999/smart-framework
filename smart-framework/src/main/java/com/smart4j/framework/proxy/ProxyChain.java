@@ -62,6 +62,8 @@ public class ProxyChain {
 			/**
 			 * 如果尚未到达proxyList代理对象的上线， 则调用List中元素：Proxy对象的doProxy方法， doProxy会回调this的doProxyChain方法
 			 */
+			System.out.println("doProxyChain proxyIndex < proxyList.size() : proxyIndex=" + proxyIndex
+					+ ", proxyList.size()=" + proxyList.size());
 			methodResult = proxyList.get(proxyIndex++).doProxy(this);
 		} else {
 			methodResult = methodProxy.invokeSuper(targetObject, methodParams);

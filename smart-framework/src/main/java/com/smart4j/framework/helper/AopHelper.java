@@ -23,6 +23,8 @@ public final class AopHelper {
      * 通过静态代码块来初始化整个AOP框架
      */
     static {
+        LOGGER.debug("=================================================================");
+        LOGGER.debug("AOP - 开始生成动态代理类Class对象及其实例对象 ..........");
         try {
             Map<Class<?>, Set<Class<?>>> proxyMap = createProxyMap();
             Map<Class<?>, List<Proxy>> targetMap = createTargetMap(proxyMap);
@@ -32,10 +34,14 @@ public final class AopHelper {
                 System.out.println(targetClass.getName());
                 Object proxy = ProxyManager.createProxy(targetClass, proxyList);
                 BeanHelper.setBean(targetClass, proxy);
+                System.out.println(
+                        "Bean targetClass=" + targetClass.getName() + ", 实例Object=" + proxy.getClass().getName());
             }
         } catch (Exception e) {
             LOGGER.error("AOP failure", e);
         }
+        LOGGER.debug("AOP - 生成动态代理类Class对象及其实例对象完成！");
+        LOGGER.debug("=================================================================\n");
     }
 
     /**
@@ -64,6 +70,7 @@ public final class AopHelper {
         System.out.println("Start to createProxyMap() .......");
         Map<Class<?>, Set<Class<?>>> proxyMap = new HashMap<Class<?>, Set<Class<?>>>();
 
+        // 获取实现AspectProxy抽象类的所有子类
         Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
         for (Class<?> proxyClass : proxyClassSet) {
             System.out.println("proxyClass.getName()=" + proxyClass.getName());

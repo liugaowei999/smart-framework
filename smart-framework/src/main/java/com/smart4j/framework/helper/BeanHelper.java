@@ -20,7 +20,6 @@ import com.smart4j.framework.utils.ReflectionUtil;
  */
 public final class BeanHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(BeanHelper.class);
-
     /**
      * 定义Bean容器。 建立Bean映射关系。（存放Bean类与Bean实例的映射关系）
      */
@@ -30,12 +29,16 @@ public final class BeanHelper {
      * 静态代码块 BeanHelper类加载阶段，获取所有Bean类，并进行时对象实例化
      */
     static {
+        LOGGER.debug("=================================================================");
+        LOGGER.debug("开始加载指定包下所有注解的Bean类 [@Controller, @Service, @Component]，并生成实例化对象 ..........");
         Set<Class<?>> beanClassSet = ClassHelper.getBeanClassSet();
         for (Class<?> clazz : beanClassSet) {
             Object beanObject = ReflectionUtil.getInstance(clazz);
             BEAN_MAP.put(clazz, beanObject);
+            System.out.println("Bean clazz=" + clazz.getName() + ", 实例Object=" + beanObject.getClass().getName());
         }
-        LOGGER.debug("=============== 加载指定包下所有注解的Bean类 [@Controller, @Service, @Component] =====================");
+        LOGGER.debug("加载指定包下所有注解的Bean类 [@Controller, @Service, @Component]，并生成实例化对象 完成!");
+        LOGGER.debug("=================================================================\n");
     }
 
     /**

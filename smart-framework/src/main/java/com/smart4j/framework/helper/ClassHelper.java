@@ -4,6 +4,9 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.smart4j.framework.annotation.Component;
 import com.smart4j.framework.annotation.Controller;
 import com.smart4j.framework.annotation.Service;
@@ -18,6 +21,7 @@ import com.smart4j.framework.utils.ClassUtil;
  *
  */
 public final class ClassHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClassHelper.class);
 
     /**
      * 定义类集合， 存放所加载的类
@@ -26,7 +30,11 @@ public final class ClassHelper {
 
     static {
         String basePackage = ConfigHelper.getAppBasePackage();
+        LOGGER.debug("=================================================================");
+        LOGGER.debug("开始扫描并加载以下package的所有类（包括jar包），并加载这些类建立Class对象:<" + basePackage + "> ...................");
         CLASS_SET = ClassUtil.getClassSet(basePackage);
+        LOGGER.debug("扫描并加载以下package的所有类（包括jar包），并加载这些类建立Class对象:<" + basePackage + "> 完成！");
+        LOGGER.debug("=================================================================\n");
     }
 
     /**

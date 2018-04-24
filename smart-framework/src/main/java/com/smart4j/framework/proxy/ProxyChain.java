@@ -73,6 +73,8 @@ public class ProxyChain {
                     + ", proxyList.size()=" + proxyList.size());
             methodResult = proxyList.get(proxyIndex++).doProxy(this); // proxyIndex++ ---> 会改变proxyIndex的值 
         } else {
+            System.out.println(
+                    "proxyIndex=" + proxyIndex + ",methodResult = methodProxy.invokeSuper(targetObject, methodParams)");
             methodResult = methodProxy.invokeSuper(targetObject, methodParams);
         }
         return methodResult;

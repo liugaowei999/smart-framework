@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.smart4j.framework.annotation.Action;
 import com.smart4j.framework.beans.Handler;
 import com.smart4j.framework.beans.Request;
@@ -18,6 +21,7 @@ import com.smart4j.framework.utils.CollectionUtil;
  *
  */
 public final class ControllerHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerHelper.class);
 
     /**
      * 保存请求与处理器的映射关系
@@ -25,6 +29,8 @@ public final class ControllerHelper {
     private static final Map<Request, Handler> ACTION_MAP = new HashMap<Request, Handler>();
 
     static {
+        LOGGER.debug("=================================================================");
+        LOGGER.debug("开始分析Controller控制器类的定义，生成 请求路径与处理请求对应方法的映射关系列表 ..........");
         // 从容器中获取所有的Controller 类
         Set<Class<?>> controllerClassSet = ClassHelper.getControllerClassSet();
 
@@ -63,6 +69,8 @@ public final class ControllerHelper {
                 }
             } // end for
         }
+        LOGGER.debug("分析Controller控制器类的定义，生成 请求路径与处理请求对应方法的映射关系列表完成！");
+        LOGGER.debug("=================================================================\n");
     }// end static
 
     /**

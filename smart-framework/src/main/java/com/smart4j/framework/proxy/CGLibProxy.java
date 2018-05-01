@@ -7,7 +7,10 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 /**
- * cglib 方式实现动态代理
+ * cglib 方式实现动态代理 ( 通过动态生成一个继承目标类的一个子类为代理类 来实现代理功能 )
+ * CGLIB原理：动态生成一个要代理类的子类，子类重写要代理的类的所有不是final的方法。
+ * -------------在子类中采用方法拦截的技术拦截所有父类方法的调用，顺势织入横切逻辑。
+ * -------------它比使用java反射的JDK动态代理要快。
  * 
  * @author liugaowei
  *
@@ -38,7 +41,7 @@ public class CGLibProxy implements MethodInterceptor {
 	@Override
 	public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 		before();
-		Object result = proxy.invokeSuper(obj, args);
+		Object result = proxy.invokeSuper(obj, args);// 调用代理类obj的父类上的方法（proxy指定了哪一个方法)
 		after();
 		return result;
 	}

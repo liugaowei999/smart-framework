@@ -65,6 +65,7 @@ import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.beans.propertyeditors.UUIDEditor;
 import org.springframework.beans.propertyeditors.ZoneIdEditor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
 import org.xml.sax.InputSource;
